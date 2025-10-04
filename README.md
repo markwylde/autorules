@@ -2,6 +2,8 @@
 
 Automated code quality checking with AI. Define rules in natural language and let AI check your entire codebase against them.
 
+![AutoRules Report](screenshot.png)
+
 ## Features
 
 - 🤖 AI-powered code analysis using any OpenRouter model
