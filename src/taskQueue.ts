@@ -4,12 +4,14 @@
 
 export type Task<T> = () => Promise<T>;
 
+interface QueueItem {
+	task: () => Promise<unknown>;
+	resolve: (value: unknown) => void;
+	reject: (reason?: Error) => void;
+}
+
 export class TaskQueue {
-	private queue: Array<{
-		task: Task<unknown>;
-		resolve: (value: unknown) => void;
-		reject: (reason?: unknown) => void;
-	}> = [];
+	private queue: QueueItem[] = [];
 	private activeWorkers = 0;
 	private maxWorkers: number;
 
@@ -21,8 +23,12 @@ export class TaskQueue {
 	 * Add a task to the queue
 	 */
 	async enqueue<T>(task: Task<T>): Promise<T> {
-		return new Promise((resolve, reject) => {
-			this.queue.push({ task, resolve, reject });
+		return new Promise<T>((resolve, reject) => {
+			this.queue.push({
+				task: task as () => Promise<unknown>,
+				resolve: resolve as (value: unknown) => void,
+				reject,
+			});
 			this.processQueue();
 		});
 	}
@@ -44,7 +50,11 @@ export class TaskQueue {
 			const result = await item.task();
 			item.resolve(result);
 		} catch (error) {
-			item.reject(error);
+			if (error instanceof Error) {
+				item.reject(error);
+			} else {
+				item.reject(new Error(String(error)));
+			}
 		} finally {
 			this.activeWorkers--;
 			this.processQueue();

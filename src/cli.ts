@@ -12,7 +12,7 @@ import {
 	createTUIState,
 	updateTUIState,
 } from "./tui.js";
-import { processFiles } from "./worker.js";
+import { type CheckResult, processFiles } from "./worker.js";
 
 async function main() {
 	// Parse command line arguments
