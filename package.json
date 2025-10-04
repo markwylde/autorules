@@ -17,7 +17,8 @@
 		"format:fix": "biome format --write .",
 		"check": "biome check .",
 		"check:fix": "biome check --write .",
-		"tidy": "npm run lint:fix && npm run format:fix && npm run check:fix"
+		"tidy": "npm run lint:fix && npm run format:fix && npm run check:fix",
+		"prepublishOnly": "npm run build"
 	},
 	"keywords": [
 		"ai",
@@ -29,12 +30,12 @@
 	"license": "MIT",
 	"dependencies": {
 		"@markwylde/ailib": "^1.5.1",
-		"glob": "^11.0.0",
+		"glob": "^11.0.3",
 		"marked": "^16.3.0"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.2.5",
-		"@types/node": "^22.10.5",
-		"typescript": "^5.7.2"
+		"@types/node": "^24.6.2",
+		"typescript": "^5.9.3"
 	}
 }
