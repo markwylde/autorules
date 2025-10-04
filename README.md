@@ -75,6 +75,8 @@ Options:
   -m, --model <model>        AI model to use (default: anthropic/claude-3.5-sonnet)
   -k, --api-key <key>        OpenRouter API key (or set OPENROUTER_API_KEY env var)
   -o, --output <path>        Output path for report (default: autorules-report.html)
+  --provider <name>          Filter to only use specific provider (e.g., Cerebras)
+  --provider-sort <method>   Sort providers by method (e.g., throughput)
   -h, --help                 Show this help message
 ```
 
@@ -102,6 +104,12 @@ autorules --output=./reports/code-quality.html
 
 ```bash
 autorules --api-key=sk-or-v1-xxxxx
+```
+
+### Using Specific Provider
+
+```bash
+autorules --provider=Cerebras --provider-sort=throughput
 ```
 
 ## Example Project Structure
