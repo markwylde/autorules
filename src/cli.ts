@@ -7,6 +7,10 @@ import { scanProject } from "./scanner.js";
 import { generateSingleRuleSummary } from "./summarizer.js";
 import { TaskQueue } from "./taskQueue.js";
 import {
+	ProviderSortOption,
+	VALID_PROVIDER_SORTS,
+} from "./modelOptions.js";
+import {
 	addSummary,
 	completeTUI,
 	createTUIState,
@@ -42,6 +46,12 @@ async function main() {
 				short: "o",
 				default: "autorules-report.html",
 			},
+			provider: {
+				type: "string",
+			},
+			"provider-sort": {
+				type: "string",
+			},
 			help: {
 				type: "boolean",
 				short: "h",
@@ -61,11 +71,14 @@ Options:
   -m, --model <model>        AI model to use (default: anthropic/claude-3.5-sonnet)
   -k, --api-key <key>        OpenRouter API key (or set OPENROUTER_API_KEY env var)
   -o, --output <path>        Output path for report (default: autorules-report.html)
+  --provider <name>          Filter to only use specific provider (e.g., Cerebras)
+  --provider-sort <method>   Sort providers by method (e.g., throughput)
   -h, --help                 Show this help message
 
 Examples:
   autorules --workers=5 --model=openai/gpt-5-mini
   autorules --report=html --output=./reports/results.html
+  autorules --provider=Cerebras --provider-sort=throughput
   OPENROUTER_API_KEY=xxx autorules
 `);
 		process.exit(0);
@@ -85,6 +98,23 @@ Examples:
 	const model = values.model as string;
 	const outputPath = resolve(values.output as string);
 	const rootDir = process.cwd();
+	const providerOnly = values.provider as string | undefined;
+	const providerSortArg = values["provider-sort"] as string | undefined;
+	let providerSort: ProviderSortOption | undefined;
+
+	if (providerSortArg) {
+		if (
+			VALID_PROVIDER_SORTS.includes(
+				providerSortArg as ProviderSortOption,
+			)
+		) {
+			providerSort = providerSortArg as ProviderSortOption;
+		} else {
+			console.warn(
+				`Warning: Invalid provider sort "${providerSortArg}". Valid options: ${VALID_PROVIDER_SORTS.join(", ")}.`,
+			);
+		}
+	}
 
 	console.log("Scanning for autorules...\n");
 
@@ -127,7 +157,7 @@ Examples:
 	// Process files using task queue
 	const results = await processFiles(
 		files,
-		{ apiKey, model, rootDir },
+		{ apiKey, model, rootDir, providerOnly, providerSort },
 		taskQueue,
 		async (result, _completed, _total) => {
 			updateTUIState(tuiState, result);
@@ -155,6 +185,8 @@ Examples:
 						apiKey,
 						model,
 						taskQueue,
+						providerOnly,
+						providerSort,
 					).then((summary) => {
 						addSummary(tuiState, summary);
 					});

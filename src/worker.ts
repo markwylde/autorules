@@ -1,6 +1,10 @@
 import { readFile } from "node:fs/promises";
 import { relative } from "node:path";
 import { createThread, OpenRouter } from "@markwylde/ailib";
+import {
+	buildModelOptions,
+	type ProviderSortOption,
+} from "./modelOptions.js";
 import type { FileToCheck } from "./scanner.js";
 import type { TaskQueue } from "./taskQueue.js";
 
@@ -19,6 +23,8 @@ export interface WorkerOptions {
 	apiKey: string;
 	model?: string;
 	rootDir: string;
+	providerOnly?: string;
+	providerSort?: ProviderSortOption;
 }
 
 /**
@@ -56,12 +62,18 @@ So please keep your answer short. If this file does not raise any concerns/probl
 
 If there are causes for concern, list exactly what part failed and why you concluded that it failed.`;
 
+		const modelOptions = buildModelOptions(
+			options.providerOnly,
+			options.providerSort,
+		);
+
 		// Create AI thread
 		const ai = createThread({
 			provider: OpenRouter,
 			model: options.model || "anthropic/claude-3.5-sonnet",
 			messages: [{ role: "user", content: prompt }],
 			apiKey: options.apiKey,
+			...(modelOptions && { modelOptions }),
 		});
 
 		// Generate response

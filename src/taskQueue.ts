@@ -37,27 +37,29 @@ export class TaskQueue {
 	 * Process the queue with worker pool
 	 */
 	private async processQueue() {
-		if (this.activeWorkers >= this.maxWorkers || this.queue.length === 0) {
-			return;
-		}
+		// Start as many workers as we can
+		while (this.activeWorkers < this.maxWorkers && this.queue.length > 0) {
+			const item = this.queue.shift();
+			if (!item) break;
 
-		const item = this.queue.shift();
-		if (!item) return;
+			this.activeWorkers++;
 
-		this.activeWorkers++;
-
-		try {
-			const result = await item.task();
-			item.resolve(result);
-		} catch (error) {
-			if (error instanceof Error) {
-				item.reject(error);
-			} else {
-				item.reject(new Error(String(error)));
-			}
-		} finally {
-			this.activeWorkers--;
-			this.processQueue();
+			// Process task without blocking queue processing
+			(async () => {
+				try {
+					const result = await item.task();
+					item.resolve(result);
+				} catch (error) {
+					if (error instanceof Error) {
+						item.reject(error);
+					} else {
+						item.reject(new Error(String(error)));
+					}
+				} finally {
+					this.activeWorkers--;
+					this.processQueue();
+				}
+			})();
 		}
 	}
 

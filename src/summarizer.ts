@@ -1,4 +1,8 @@
 import { createThread, OpenRouter } from "@markwylde/ailib";
+import {
+	buildModelOptions,
+	type ProviderSortOption,
+} from "./modelOptions.js";
 import type { AutoRule } from "./scanner.js";
 import type { TaskQueue } from "./taskQueue.js";
 import type { CheckResult } from "./worker.js";
@@ -30,9 +34,11 @@ export async function generateSingleRuleSummary(
 	apiKey: string,
 	model: string,
 	taskQueue: TaskQueue,
+	providerOnly?: string,
+	providerSort?: ProviderSortOption,
 ): Promise<RuleSummary> {
 	return taskQueue.enqueue(async () => {
-		return await _generateSummary(ruleResults, rule, apiKey, model);
+		return await _generateSummary(ruleResults, rule, apiKey, model, providerOnly, providerSort);
 	});
 }
 
@@ -44,6 +50,8 @@ async function _generateSummary(
 	rule: AutoRule,
 	apiKey: string,
 	model: string,
+	providerOnly?: string,
+	providerSort?: ProviderSortOption,
 ): Promise<RuleSummary> {
 	const passed = ruleResults.filter((r) => r.passed).length;
 	const failed = ruleResults.filter((r) => !r.passed).length;
@@ -69,11 +77,14 @@ Please provide a summary of the overall findings for this rule. Focus on the fin
 Write it in markdown.
 `;
 
+	const modelOptions = buildModelOptions(providerOnly, providerSort);
+
 	const ai = createThread({
 		provider: OpenRouter,
 		model: model,
 		messages: [{ role: "user", content: prompt }],
 		apiKey: apiKey,
+		...(modelOptions && { modelOptions }),
 	});
 
 	const stream = ai.messages.generate();
