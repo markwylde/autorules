@@ -1,0 +1,40 @@
+{
+	"name": "autorules",
+	"version": "1.0.0",
+	"type": "module",
+	"description": "Automated code quality checking with AI",
+	"main": "dist/cli.js",
+	"bin": {
+		"autorules": "./dist/cli.js"
+	},
+	"scripts": {
+		"build": "tsc",
+		"dev": "tsc --watch",
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"lint": "biome lint .",
+		"lint:fix": "biome lint --write .",
+		"format": "biome format .",
+		"format:fix": "biome format --write .",
+		"check": "biome check .",
+		"check:fix": "biome check --write .",
+		"tidy": "npm run lint:fix && npm run format:fix && npm run check:fix"
+	},
+	"keywords": [
+		"ai",
+		"code-quality",
+		"automation",
+		"linting"
+	],
+	"author": "",
+	"license": "MIT",
+	"dependencies": {
+		"@markwylde/ailib": "^1.5.1",
+		"glob": "^11.0.0",
+		"marked": "^16.3.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.2.5",
+		"@types/node": "^22.10.5",
+		"typescript": "^5.7.2"
+	}
+}
