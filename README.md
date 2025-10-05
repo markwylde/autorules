@@ -72,7 +72,7 @@ Usage: autorules [options]
 Options:
   -w, --workers <number>     Number of parallel workers (default: 3)
   -r, --report <format>      Report format: html (default: html)
-  -m, --model <model>        AI model to use (default: anthropic/claude-3.5-sonnet)
+  -m, --model <model>        AI model to use (default: openai/gpt-oss-120b)
   -k, --api-key <key>        OpenRouter API key (or set OPENROUTER_API_KEY env var)
   -o, --output <path>        Output path for report (default: autorules-report.html)
   --provider <name>          Filter to only use specific provider (e.g., Cerebras)
@@ -128,6 +128,8 @@ my-project/
 
 ## Example Rules
 
+Each rule uses a simple frontmatter block. Alongside `title` and `files`, you can optionally provide an `includes` entry that points (relative to the rule file) to supporting guidance that should be embedded in every prompt.
+
 ### No Hardcoded Secrets
 
 ```markdown
@@ -148,14 +150,23 @@ files: src/**/*.js
 Function names should use camelCase and be descriptive. Variable names should also use camelCase.
 ```
 
-### Test Coverage
-
 ```markdown
 title: Test files required
 files: src/**/*.js
 ---
 
 For every source file, there should be a corresponding test file. Check if this pattern is followed.
+```
+
+### Rule With Shared Specification
+
+```markdown
+title: Must match the code guide
+files: docs/**/*.md
+includes: ../specs/CODE_GUIDE.md
+---
+
+Confirm that this file follows the shared documentation standards defined in the included guide.
 ```
 
 ## HTML Report

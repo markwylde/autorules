@@ -1,10 +1,7 @@
 import { readFile } from "node:fs/promises";
-import { relative } from "node:path";
+import { dirname, relative, resolve } from "node:path";
 import { createThread, OpenRouter } from "@markwylde/ailib";
-import {
-	buildModelOptions,
-	type ProviderSortOption,
-} from "./modelOptions.js";
+import { buildModelOptions, type ProviderSortOption } from "./modelOptions.js";
 import type { FileToCheck } from "./scanner.js";
 import type { TaskQueue } from "./taskQueue.js";
 
@@ -41,6 +38,30 @@ export async function checkFile(
 		// Read the file content
 		const content = await readFile(path, "utf-8");
 
+		// Read included file if specified
+		let includesContent = "";
+		if (rule.includes) {
+			try {
+				const ruleDir = dirname(rule.rulePath);
+				const includesPath = resolve(ruleDir, rule.includes);
+				const includesFileContent = await readFile(includesPath, "utf-8");
+				includesContent = `File: ${rule.includes}
+Content:
+\`\`\`
+${includesFileContent}
+\`\`\`
+
+---
+
+`;
+			} catch (error) {
+				// If the includes file cannot be read, continue without it
+				console.warn(
+					`Warning: Could not read includes file ${rule.includes}: ${error instanceof Error ? error.message : String(error)}`,
+				);
+			}
+		}
+
 		// Build the prompt
 		const prompt = `FILENAME: ${relativePath}
 CONTENT: application/text
@@ -54,7 +75,7 @@ You have been chosen to analyse \`${relativePath}\`.
 
 The criteria you are to assess the file on is:
 
-> ${rule.criteria}
+${includesContent}> ${rule.criteria}
 
 Your response will not get directly sent to the user, but instead will be combined with the responses of every other files generated.
 
@@ -70,7 +91,7 @@ If there are causes for concern, list exactly what part failed and why you concl
 		// Create AI thread
 		const ai = createThread({
 			provider: OpenRouter,
-			model: options.model || "anthropic/claude-3.5-sonnet",
+			model: options.model || "openai/gpt-oss-120b",
 			messages: [{ role: "user", content: prompt }],
 			apiKey: options.apiKey,
 			...(modelOptions && { modelOptions }),

@@ -33,6 +33,7 @@ export interface TUIState {
 	rules: AutoRule[];
 	results: CheckResult[];
 	summaries: Map<string, RuleSummary>;
+	fileTotalsByRule: Map<string, number>;
 	totalFiles: number;
 	completedFiles: number;
 	failures: number;
@@ -57,7 +58,7 @@ function createProgressBar(
 ): string {
 	const percentage = total === 0 ? 0 : completed / total;
 	const filled = Math.floor(percentage * width);
-	const empty = width - filled;
+	const empty = Math.max(0, width - filled);
 
 	const bar = "█".repeat(filled) + "░".repeat(empty);
 	const color =
@@ -150,12 +151,12 @@ export function renderTUI(state: TUIState): void {
 	for (const rule of state.rules) {
 		const ruleResults = grouped.get(rule.title) || [];
 		const completed = ruleResults.length;
-		const total = state.totalFiles / state.rules.length; // Approximate
+		const total = state.fileTotalsByRule.get(rule.title) || 0;
 		const failures = ruleResults.filter((r) => !r.passed).length;
 		const summary = state.summaries.get(rule.title);
 
 		const ruleColor = failures > 0 ? colors.red : colors.green;
-		const percentage = Math.floor((completed / total) * 100);
+		const percentage = total === 0 ? 0 : Math.floor((completed / total) * 100);
 
 		console.log(
 			`  ${colors.bright}${index}.${colors.reset} ${ruleColor}${rule.title}${colors.reset}`,
@@ -189,6 +190,7 @@ export function createTUIState(
 	model: string,
 	rules: AutoRule[],
 	totalFiles: number,
+	fileTotalsByRule: Map<string, number>,
 ): TUIState {
 	return {
 		status: "Processing",
@@ -198,6 +200,7 @@ export function createTUIState(
 		rules,
 		results: [],
 		summaries: new Map(),
+		fileTotalsByRule,
 		totalFiles,
 		completedFiles: 0,
 		failures: 0,

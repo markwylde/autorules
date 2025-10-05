@@ -5,6 +5,7 @@ import { glob } from "glob";
 export interface AutoRule {
 	title: string;
 	files: string;
+	includes?: string;
 	criteria: string;
 	rulePath: string;
 }
@@ -21,7 +22,7 @@ function parseFrontmatter(content: string): {
 	metadata: Record<string, string>;
 	body: string;
 } {
-	const frontmatterRegex = /^(title: .+\nfiles: .+\n)---\n([\s\S]+)$/;
+	const frontmatterRegex = /^([\s\S]*?)---\n([\s\S]+)$/;
 	const match = content.match(frontmatterRegex);
 
 	if (!match) {
@@ -37,8 +38,12 @@ function parseFrontmatter(content: string): {
 		.trim()
 		.split("\n")
 		.forEach((line) => {
-			const [key, ...valueParts] = line.split(":");
-			metadata[key.trim()] = valueParts.join(":").trim();
+			const colonIndex = line.indexOf(":");
+			if (colonIndex > 0) {
+				const key = line.substring(0, colonIndex).trim();
+				const value = line.substring(colonIndex + 1).trim();
+				metadata[key] = value;
+			}
 		});
 
 	return { metadata, body: body.trim() };
@@ -91,6 +96,7 @@ export async function loadAutoRules(
 			rules.push({
 				title: metadata.title || "Untitled Rule",
 				files: metadata.files || "**/*",
+				includes: metadata.includes,
 				criteria: body,
 				rulePath,
 			});

@@ -2,14 +2,14 @@
 
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
+import {
+	type ProviderSortOption,
+	VALID_PROVIDER_SORTS,
+} from "./modelOptions.js";
 import { generateHTMLReport } from "./report.js";
 import { scanProject } from "./scanner.js";
 import { generateSingleRuleSummary } from "./summarizer.js";
 import { TaskQueue } from "./taskQueue.js";
-import {
-	ProviderSortOption,
-	VALID_PROVIDER_SORTS,
-} from "./modelOptions.js";
 import {
 	addSummary,
 	completeTUI,
@@ -35,7 +35,7 @@ async function main() {
 			model: {
 				type: "string",
 				short: "m",
-				default: "openai/gpt-5-mini",
+				default: "openai/gpt-oss-120b",
 			},
 			"api-key": {
 				type: "string",
@@ -68,7 +68,7 @@ Usage: autorules [options]
 Options:
   -w, --workers <number>     Number of parallel workers (default: 3)
   -r, --report <format>      Report format: html (default: html)
-  -m, --model <model>        AI model to use (default: anthropic/claude-3.5-sonnet)
+  -m, --model <model>        AI model to use (default: openai/gpt-oss-120b)
   -k, --api-key <key>        OpenRouter API key (or set OPENROUTER_API_KEY env var)
   -o, --output <path>        Output path for report (default: autorules-report.html)
   --provider <name>          Filter to only use specific provider (e.g., Cerebras)
@@ -76,7 +76,7 @@ Options:
   -h, --help                 Show this help message
 
 Examples:
-  autorules --workers=5 --model=openai/gpt-5-mini
+  autorules --workers=5 --model=openai/gpt-oss-120b
   autorules --report=html --output=./reports/results.html
   autorules --provider=Cerebras --provider-sort=throughput
   OPENROUTER_API_KEY=xxx autorules
@@ -103,11 +103,7 @@ Examples:
 	let providerSort: ProviderSortOption | undefined;
 
 	if (providerSortArg) {
-		if (
-			VALID_PROVIDER_SORTS.includes(
-				providerSortArg as ProviderSortOption,
-			)
-		) {
+		if (VALID_PROVIDER_SORTS.includes(providerSortArg as ProviderSortOption)) {
 			providerSort = providerSortArg as ProviderSortOption;
 		} else {
 			console.warn(
@@ -138,19 +134,27 @@ Examples:
 	// Create global task queue
 	const taskQueue = new TaskQueue(workers);
 
-	// Create TUI state
-	const tuiState = createTUIState(workers, model, rules, files.length);
-	const startTime = Date.now();
-
-	// Track results by rule to detect completion
-	const ruleResultsMap = new Map<string, CheckResult[]>(
-		rules.map((r) => [r.title, []]),
-	);
+	// Calculate per-rule file counts
 	const ruleFileCounts = new Map(
 		rules.map((r) => [
 			r.title,
 			files.filter((f) => f.rule.title === r.title).length,
 		]),
+	);
+
+	// Create TUI state
+	const tuiState = createTUIState(
+		workers,
+		model,
+		rules,
+		files.length,
+		ruleFileCounts,
+	);
+	const startTime = Date.now();
+
+	// Track results by rule to detect completion
+	const ruleResultsMap = new Map<string, CheckResult[]>(
+		rules.map((r) => [r.title, []]),
 	);
 	const ruleSummaryGenerated = new Set<string>();
 

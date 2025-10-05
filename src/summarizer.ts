@@ -1,8 +1,5 @@
 import { createThread, OpenRouter } from "@markwylde/ailib";
-import {
-	buildModelOptions,
-	type ProviderSortOption,
-} from "./modelOptions.js";
+import { buildModelOptions, type ProviderSortOption } from "./modelOptions.js";
 import type { AutoRule } from "./scanner.js";
 import type { TaskQueue } from "./taskQueue.js";
 import type { CheckResult } from "./worker.js";
@@ -38,7 +35,14 @@ export async function generateSingleRuleSummary(
 	providerSort?: ProviderSortOption,
 ): Promise<RuleSummary> {
 	return taskQueue.enqueue(async () => {
-		return await _generateSummary(ruleResults, rule, apiKey, model, providerOnly, providerSort);
+		return await _generateSummary(
+			ruleResults,
+			rule,
+			apiKey,
+			model,
+			providerOnly,
+			providerSort,
+		);
 	});
 }
 
