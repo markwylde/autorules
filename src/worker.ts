@@ -128,7 +128,7 @@ If there are causes for concern, list exactly what part failed and why you concl
 			passed,
 			response: response.trim(),
 			tokens: lastMessage.tokens,
-			cost: lastMessage.cost,
+			cost: lastMessage.totalCost,
 		};
 	} catch (error) {
 		return {
