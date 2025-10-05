@@ -150,7 +150,13 @@ files: src/**/*.js
 Function names should use camelCase and be descriptive. Variable names should also use camelCase.
 ```
 
-### Test Coverage
+```markdown
+title: Test files required
+files: src/**/*.js
+---
+
+For every source file, there should be a corresponding test file. Check if this pattern is followed.
+```
 
 ### Rule With Shared Specification
 
@@ -161,14 +167,6 @@ includes: ../specs/CODE_GUIDE.md
 ---
 
 Confirm that this file follows the shared documentation standards defined in the included guide.
-```
-
-```markdown
-title: Test files required
-files: src/**/*.js
----
-
-For every source file, there should be a corresponding test file. Check if this pattern is followed.
 ```
 
 ## HTML Report
