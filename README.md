@@ -72,7 +72,7 @@ Usage: autorules [options]
 Options:
   -w, --workers <number>     Number of parallel workers (default: 3)
   -r, --report <format>      Report format: html (default: html)
-  -m, --model <model>        AI model to use (default: anthropic/claude-3.5-sonnet)
+  -m, --model <model>        AI model to use (default: openai/gpt-oss-120b)
   -k, --api-key <key>        OpenRouter API key (or set OPENROUTER_API_KEY env var)
   -o, --output <path>        Output path for report (default: autorules-report.html)
   --provider <name>          Filter to only use specific provider (e.g., Cerebras)

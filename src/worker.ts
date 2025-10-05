@@ -89,9 +89,9 @@ If there are causes for concern, list exactly what part failed and why you concl
 		);
 
 		// Create AI thread
-		const ai = createThread({
-			provider: OpenRouter,
-			model: options.model || "anthropic/claude-3.5-sonnet",
+			const ai = createThread({
+				provider: OpenRouter,
+				model: options.model || "openai/gpt-oss-120b",
 			messages: [{ role: "user", content: prompt }],
 			apiKey: options.apiKey,
 			...(modelOptions && { modelOptions }),
