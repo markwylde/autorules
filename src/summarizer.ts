@@ -10,6 +10,8 @@ export interface RuleSummary {
 	totalChecked: number;
 	passed: number;
 	failed: number;
+	tokens?: number;
+	cost?: number;
 }
 
 // ANSI color codes
@@ -102,11 +104,16 @@ Write it in markdown.
 		stream.on("error", (error) => reject(error));
 	});
 
+	// Get the last message for token/cost info
+	const lastMessage = ai.messages.list[ai.messages.list.length - 1];
+
 	return {
 		rule,
 		summary: summary.trim(),
 		totalChecked: ruleResults.length,
 		passed,
 		failed,
+		tokens: lastMessage.tokens,
+		cost: lastMessage.totalCost,
 	};
 }

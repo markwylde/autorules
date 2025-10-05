@@ -214,6 +214,15 @@ export function createTUIState(
  */
 export function addSummary(state: TUIState, summary: RuleSummary): void {
 	state.summaries.set(summary.rule.title, summary);
+
+	// Add summary tokens and cost to totals
+	if (summary.tokens) {
+		state.totalTokens += summary.tokens;
+	}
+	if (summary.cost) {
+		state.totalCost += summary.cost;
+	}
+
 	renderTUI(state);
 }
 
