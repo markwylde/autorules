@@ -128,6 +128,8 @@ my-project/
 
 ## Example Rules
 
+Each rule uses a simple frontmatter block. Alongside `title` and `files`, you can optionally provide an `includes` entry that points (relative to the rule file) to supporting guidance that should be embedded in every prompt.
+
 ### No Hardcoded Secrets
 
 ```markdown
@@ -149,6 +151,17 @@ Function names should use camelCase and be descriptive. Variable names should al
 ```
 
 ### Test Coverage
+
+### Rule With Shared Specification
+
+```markdown
+title: Must match the code guide
+files: docs/**/*.md
+includes: ../specs/CODE_GUIDE.md
+---
+
+Confirm that this file follows the shared documentation standards defined in the included guide.
+```
 
 ```markdown
 title: Test files required
